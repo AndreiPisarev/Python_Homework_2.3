@@ -3,12 +3,12 @@ import json
 
 
 def open_file(name_file):
+    """Объеденил определение кодировки и чтнение файла в один open"""
     with open(name_file, 'rb') as file:
         data = file.read()
         result = chardet.detect(data)
         print(result['encoding'])
-        data_text = data.decode(encoding=result['encoding'])
-        data_json = json.loads(data_text)
+        data_json = json.loads(data.decode(encoding=result['encoding']))
         data_news = data_json['rss']['channel']['items']
 
         list_news = list()
@@ -26,7 +26,8 @@ def open_file(name_file):
 
 def top_10_popular(list_char_more_6):
     """ Принимаем список слов длинее 6 символов, проходим по списку и составляем словарь {слово: повторения}
-    сортируем сло"""
+    сортируем словарь"""
+
     list_word = list()
     freq = {}
 
