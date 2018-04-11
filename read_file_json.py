@@ -40,9 +40,7 @@ def top_10_popular(list_char_more_6):
     sorted_count_pair = sorted(freq.items(), key=lambda x: x[1], reverse=True)
     sorted_count_pair = sorted_count_pair[:10]  # С помощью среза выбираем ТОП 10
 
-    for word, count in sorted_count_pair:
-        if word not in list_word:
-            list_word.append(word)
+    list_word = [word for word, count in sorted_count_pair]
 
     return list_word
 
