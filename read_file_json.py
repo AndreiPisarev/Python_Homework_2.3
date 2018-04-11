@@ -1,43 +1,47 @@
-def detect_encording(name_file):
-    import chardet
-    with open(name_file, 'rb') as f:
-        data = f.read()
+import chardet
+import json
+
+
+def open_file(name_file):
+    with open(name_file, 'rb') as file:
+        data = file.read()
         result = chardet.detect(data)
-        print("\nКодировка в {}: {}".format(name_file, result['encoding']))
+        print(result['encoding'])
+        data_text = data.decode(encoding=result['encoding'])
+        data_json = json.loads(data_text)
+        data_news = data_json['rss']['channel']['items']
 
-        return result['encoding']
+        list_news = list()
+        for description in data_news:
+            list_news.append(description['title'])
+            list_news.append(description['description'])
 
-
-def read_file(name_file, encoding_file):
-    import json
-
-    with open(name_file, encoding=encoding_file) as file:
         list_char_more_6 = list()
-        data = json.load(file)
-        data_string = data['rss']['channel']['items'][1]["description"]
-        list_data_string = data_string.lower().split(' ')
-        list_char_more_6 = [i for i in list_data_string if len(i) > 6]
+        for str_news in list_news:
+            list_string_file = str_news.lower().split(' ')
+            list_char_more_6 = [char for char in list_string_file if len(char) > 6]
 
         return list_char_more_6
 
 
 def top_10_popular(list_char_more_6):
+    """ Принимаем список слов длинее 6 символов, проходим по списку и составляем словарь {слово: повторения}
+    сортируем сло"""
     list_word = list()
-    list_word_unique = list()
-    list_word = [[list_char_more_6.count(i), i] for i in list_char_more_6]
+    freq = {}
 
-    for i in list_word:
-        if i not in list_word_unique:
-            list_word_unique.append(i)  # Убираем повторяющие элементы из списка
+    for word in list_char_more_6:
+        if word not in freq:
+            freq[word] = 1
+        else:
+            freq[word] += 1
 
-    list_word_unique.sort(reverse=True)  # Сортрируем, первыми занч. будут с наиб. числом повторений [повторн:слово]
-    list_word_top_10 = list_word_unique[:10]  # С помощью среза выбираем ТОП 10
-    list_word = list()
+    sorted_count_pair = sorted(freq.items(), key=lambda x: x[1], reverse=True)
+    sorted_count_pair = sorted_count_pair[:10]  # С помощью среза выбираем ТОП 10
 
-    for i in list_word_top_10:
-        for i_i in i:
-            if i[1] not in list_word:
-                list_word.append(i[1])
+    for word, count in sorted_count_pair:
+        if word not in list_word:
+            list_word.append(word)
 
     return list_word
 
@@ -52,8 +56,7 @@ def main():
     list_file = ['newsafr.json', 'newscy.json', 'newsfr.json', 'newsit.json']
 
     for name_file in list_file:
-        encoding_file = detect_encording(name_file)
-        list_char_more_6 = read_file(name_file, encoding_file)
+        list_char_more_6 = open_file(name_file)
         list_word = top_10_popular(list_char_more_6)
         print_word(list_word, name_file)
 
